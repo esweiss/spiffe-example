@@ -41,6 +41,10 @@ Demonstrates two Tomcats using a SPIFFE based KeyStore and TrustStore that handl
 
 Shows a Federation scenario with two trust-domains, one having a JBOSS Wildfly Server connecting to a PostgreSQL database proxied by a NGNIX running on the other trust-domain. 
 
+**[spire-envoy-agent](spire-envoy-agent)
+
+Demonstrates using Envoy proxy to facilitate secure communication using mTLS and TLS+JWT between two federated trust domains. Envoy proxy receives and validates secrets via an SPIFFE Envoy Agent implementing the Envoy SDS and External Auth APIs and providing the glue between Envoy and the SPIRE Agent.
+
 ## Infrastructure
 
 **[vagrant_k8s](vagrant_k8s) - Local Kubernetes with Vagrant**

@@ -1,0 +1,3 @@
+[submodule "spiffe-envoy-agent/src/spiffe-envoy-agent"]
+	path = spiffe-envoy-agent/src/spiffe-envoy-agent
+	url = https://github.com/spiffe/spiffe-envoy-agent

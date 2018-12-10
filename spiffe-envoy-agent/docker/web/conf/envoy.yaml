@@ -1,0 +1,118 @@
+node:
+  id: "id_02"
+  cluster: "cluster_02"
+static_resources:
+  listeners:
+  - name: envoy_to_envoy_listener
+    address:
+      socket_address:
+        address: 127.0.0.1
+        port_value: 8001
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          idle_timeout: 1s
+          codec_type: auto
+          access_log:
+          - name: envoy.file_access_log
+            config:
+              path: "/tmp/envoy-to-envoy.log"
+          stat_prefix: ingress_http
+          route_config:
+            name: service_route
+            virtual_hosts:
+            - name: envoy_to_envoy
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: envoy_to_envoy
+          http_filters:
+          - name: envoy.router
+  - name: envoy_to_proxy_listener
+    address:
+      socket_address:
+        address: 127.0.0.1
+        port_value: 8002
+    filter_chains:
+    - filters:
+      - name: envoy.http_connection_manager
+        config:
+          idle_timeout: 1s
+          codec_type: auto
+          access_log:
+          - name: envoy.file_access_log
+            config:
+              path: "/tmp/envoy-to-proxy.log"
+          stat_prefix: ingress_http
+          route_config:
+            name: service_route
+            virtual_hosts:
+            - name: envoy_to_proxy
+              domains: ["*"]
+              routes:
+              - match:
+                  prefix: "/"
+                route:
+                  cluster: envoy_to_proxy
+          http_filters:
+          - name: envoy.ext_authz
+            config:
+              grpc_service:
+                envoy_grpc:
+                  cluster_name: spiffe_envoy_agent
+          - name: envoy.router
+  clusters:
+  - name: spiffe_envoy_agent
+    connect_timeout: 0.25s
+    http2_protocol_options: {}
+    hosts:
+      - pipe:
+          path: /tmp/spiffe-envoy-agent.sock
+  - name: envoy_to_envoy
+    connect_timeout: 0.25s
+    type: strict_dns
+    lb_policy: ROUND_ROBIN
+    hosts:
+      - socket_address:
+          address: echo
+          port_value: 8001
+    tls_context:
+      common_tls_context:
+        tls_certificate_sds_secret_configs:
+          - name: spiffe_x509_svid
+            sds_config:
+              api_config_source:
+                api_type: GRPC
+                grpc_services:
+                  envoy_grpc:
+                    cluster_name: spiffe_envoy_agent
+        validation_context_sds_secret_config:
+          name: spiffe_x509_bundle
+          sds_config:
+            api_config_source:
+              api_type: GRPC
+              grpc_services:
+                envoy_grpc:
+                  cluster_name: spiffe_envoy_agent
+        tls_params:
+          ecdh_curves:
+            - X25519:P-256:P-521:P-384
+  - name: envoy_to_proxy
+    connect_timeout: 0.25s
+    type: strict_dns
+    lb_policy: ROUND_ROBIN
+    hosts:
+      - socket_address:
+          address: layer7proxy
+          port_value: 8443
+    tls_context:
+      common_tls_context:
+        validation_context:
+            trusted_ca:
+              filename: /etc/ssl/certs/proxy-cacert.pem
+        tls_params:
+          ecdh_curves:
+            - X25519:P-256:P-521:P-384
