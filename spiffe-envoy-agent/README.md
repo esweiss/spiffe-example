@@ -106,6 +106,7 @@ Starting echo server SPIFFE Envoy agent...
 ```
 
 ### 3. Federate Trust Domains
+
 ```
 $ ./3-federate-trust-domains.sh
 Federating trustdomain1.org and trustdomain2.org...
@@ -163,8 +164,57 @@ JWT-SVID of the Web Server for authentication.
 
 ![Envoy-to-Proxy](img/envoy-to-proxy.png)
 
-Note the `Authorization` header injected by the forward Envoy proxy containing
+Note the `Authorization` header injected by the _forward_ Envoy proxy containing
 the JWT-SVID.
+
+### Things To Try
+
+#### Unfederate Workloads
+
+To see what happens when the workloads no longer federate with each other:
+
+```
+$ ./5-unfederate-workloads.sh
+```
+
+Run the Envoy to Envoy scenario and notice that the _forward_ Envoy proxy cannot obtain a connection to the _reverse_ Envoy proxy. This is due to the _forward_ Envoy proxy failing the mTLS handshake because it no longer trusts the server certificate presented by the _reverse_ Envoy proxy.
+
+Run Envoy to Envoy via Layer 7 Proxy scenario and notice the JWT fails validation since the SPIRE Agent won't have keys for Trust Domain 1.
+
+Re-federate the workloads afterwards to restore connectivity:
+
+```
+$ ./6-federate-workloads.sh
+```
+
+#### Break Authorization
+
+The SPIFFE Envoy agent for the Echo server maintains an "allowed" list for
+SPIFFE IDs that it authorizes for both x509 an JWT validation. This list
+influences whether or not the _forward_ Envoy proxy is authorized to connect
+upstream.
+
+Edit the "allowed" list by editing the configuration and looking for the
+`allowed_spiffe_ids_x509` and `allowed_spiffe_ids_jwt` lists:
+
+```
+$ docker-compose exec echo vim /etc/spiffe-envoy-agent.conf
+```
+
+Afterwards, reload the SPIFFE Envoy Agent:
+
+```
+$ docker-compose exec echo reload-spiffe-envoy-agent
+```
+
+Run the Envoy to Envoy scenario. The mTLS handshake will fail between the
+_forward_ and _reverse_ Envoy proxies.
+
+Run the Envoy to Envoy via Layer 7 Proxy scenario. JWT validation will fail
+because the subject claim is not in the allowed list.
+
+Don't forget to restore the configuration and reload the SPIFFE Envoy Agent
+when you are finished.
 
 ### Cleanup
 
