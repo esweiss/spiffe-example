@@ -11,7 +11,7 @@ workloads: a web server and an echo server. Secure communication is established
 between the workloads via a set of Envoy proxies. Envoy retrieves client and
 server TLS certificates and trusted CA roots for mTLS and TLS communication
 from a SPIRE Agent via a SPIFFE Envoy Agent which implements an Envoy Secret
-Discovery Service (SDS). JWT injection/validation on the HTTP stream is
+Discovery Service ([SDS](https://www.envoyproxy.io/docs/envoy/latest/configuration/secret)). JWT injection/validation on the HTTP stream is
 facilitated by an External Authorization filter also implemented by the SPIFFE
 Envoy Agent.
 
@@ -58,8 +58,8 @@ Envoy Agent uses the SPIFFE Workload API to perform the validation.
 5. This repository:
 
 ```bash
-$ git clone https://github.com/spiffe/spiffe-examples
-$ cd spiffe-examples
+$ git clone https://github.com/spiffe/spiffe-example.git
+$ cd spiffe-example
 $ git submodule update --init --recursive
 $ cd spiffe-envoy-agent
 ```
@@ -84,18 +84,13 @@ Creating spiffe-envoy-agent_layer7proxy_1         ... done
 Creating spiffe-envoy-agent_web_1                 ... done
 ```
 
-#### Start Web Server and Echo Server
+#### Start Web Server, Echo Server, and Layer 7 Proxy
 
 ```
 $ ./1-start-services.sh
 Starting web server...
 Starting echo server...
-```
-
-#### Start Layer 7 Proxy
-
-```
-$ docker-compose exec -d layer7proxy layer7proxy -to echo:8002
+Starting layer 7 proxy...
 ```
 
 ### 2. Start SPIRE Infrastructure
