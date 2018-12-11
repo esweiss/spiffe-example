@@ -1,0 +1,37 @@
+version: '3'
+services:
+  trustdomain1-server:
+    build: ./docker/trustdomain1-server
+    hostname: trustdomain1-server
+    tty: true
+    privileged: true
+  trustdomain2-server:
+    build: ./docker/trustdomain2-server
+    hostname: trustdomain2-server
+    tty: true
+    privileged: true
+  echo:
+    build: ./docker/echo
+    hostname: echo
+    tty: true
+    privileged: true
+    links:
+      - trustdomain2-server
+  web:
+    build: ./docker/web
+    hostname: web
+    tty: true
+    privileged: true
+    links:
+      - trustdomain1-server
+      - layer7proxy
+      - echo
+    ports:
+      - 8080:8080
+  layer7proxy:
+    build: ./docker/layer7proxy
+    hostname: layer7proxy
+    tty: true
+    privileged: true
+    links:
+      - echo

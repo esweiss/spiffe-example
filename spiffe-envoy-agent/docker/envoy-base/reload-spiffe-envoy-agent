@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -e
+
+PIDOF=$(pidof spiffe-envoy-agent)
+if [ ! -z $PIDOF ]; then
+	kill -s HUP $PIDOF
+fi

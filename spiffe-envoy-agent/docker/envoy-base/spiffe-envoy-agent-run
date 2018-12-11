@@ -1,0 +1,3 @@
+#!/bin/bash
+
+exec setuidgid spiffe-envoy-agent spiffe-envoy-agent run
