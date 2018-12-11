@@ -190,9 +190,9 @@ $ ./6-federate-workloads.sh
 #### Break Authorization
 
 The SPIFFE Envoy agent for the Echo server maintains an "allowed" list for
-SPIFFE IDs that it authorizes for both x509 an JWT validation. Modifying this=
-list and reloading the SPIFFE Envoy agent, influences whether or not the
-_forward_ Envoy proxy is authorized to connect upstream.
+SPIFFE IDs that it authorizes for both x509 an JWT validation. This list
+influences whether or not the _forward_ Envoy proxy is authorized to connect
+upstream.
 
 Edit the "allowed" list by editing the configuration and looking for the
 `allowed_spiffe_ids_x509` and `allowed_spiffe_ids_jwt` lists:
