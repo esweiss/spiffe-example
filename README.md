@@ -1,3 +1,9 @@
+# Deprecated
+
+## The SPIFFE examples repository is deprecated (and archived).
+The examples contained here are unmaintained, and most will not work with current code.
+For maintained examples, please see the [spire-examples repository](https://github.com/spiffe/spire-examples).
+
 # SPIFFE examples 
 
 This repository contains infrastructure for development and demos as well as automated demos for each SPIRE release
